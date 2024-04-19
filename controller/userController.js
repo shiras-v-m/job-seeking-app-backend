@@ -2,27 +2,24 @@ import { catchAsyncError } from "../middlewares/catchAsyncError.js"
 import ErrorHandler from "../middlewares/error.js";
 import { User } from "../models/userSchema.js";
 import {sendToken} from '../utils/jwtToken.js'
-export const register= catchAsyncError( async(req,res,next)=>{
-    const {name,email,phone,role,password}=req.body;
-    if(!name || !email || !phone || !role || !password){
-        return next(new ErrorHandler("Plesse fill the full registration form!"))
-    }
-    const isEmail= await(User.findOne({email}))
-    if(isEmail){
-        return next(new ErrorHandler("Email already exists!"))
+export const register = catchAsyncError(async (req, res, next) => {
+    const { name, email, phone, role, password } = req.body;
+    if (!name || !email || !phone || !role || !password) {
+        return next(new ErrorHandler("Please fill the full registration form!"));
     }
 
-    const user=await User.create({
-        name,email,phone,role,password
-    })
+    const isEmail = await User.findOne({ email });
+    if (isEmail) {
+        return next(new ErrorHandler("Email already exists!"));
+    }
 
-    res.status(200).json({
-        success:true,
-        message:"User Registered!",
-        user
-    })
-    sendToken(user,200,res,"User registered successsfully")
-})
+    const user = await User.create({ name, email, phone, role, password });
+
+    // If sendToken is meant to send additional data or perform another action,
+    // handle that logic here without sending another response
+    sendToken(user, 200, res, "User registered successfully");
+});
+
 
 
 export const login = catchAsyncError(async (req, res, next) => {
@@ -53,5 +50,13 @@ export const logout=catchAsyncError(async (req,res,next)=>{
     }).json({
         success:true,
         message:"User logged out successfully!"
+    })
+})
+
+export const getUser = catchAsyncError(async(req,res,next)=>{
+    const user=req.user
+    res.status(200).json({
+        success:true,
+        user
     })
 })
